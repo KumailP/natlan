@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <windows.h>
 #define SIZE 512
 
-
+void printIntro();
+void executeCommand(char sent[]);
+void getSentence(char sent[]);
 void compile(int flag);
 void goTo();
 void currentTime();
@@ -14,71 +15,128 @@ void weather(char sent[]);
 void hostName();
 
 int main(){
-
-	int gccFlag = 0, i = 0;
-	system("cls");
-	printf("\n\t------    WELCOME TO NATLAN     ------");
-	printf("\n\t- NATURAL LANGUAGE COMMAND INTERFACE -\n");
-	printf("\n\tTo bring up commands, type \"commands\"");
-	printf("\n\tHello! I am Natlan. How may I assist you? (format: Natlan, ....)\n");
-	
+	int i = 0;
 	char sent[100];
-	char text[100];
-	char natlanW[50] = "Natlan";
 
+	printIntro();
 	while(!(strstr(sent,"quit") !=NULL)){
-		printf("\n\tEnter command:\n\t-> ");
-		scanf ("%[^\n]%*c", sent);
-		strcpy(text, sent);
-		if(strstr(sent,"compile")!=NULL){
-			if(strstr(sent, "gcc")!=NULL){
-				gccFlag = 1;
-			}
-			compile(gccFlag);
-		}else if((strstr(sent,"go to")) || (strstr(sent,"open")) || (strstr(sent,"go"))!=NULL){
-			goTo();
-		}else if((strstr(sent, "help")) || (strstr(sent, "commands")) !=NULL){
-			//helpMenu();
-			printf("showing commands");
-		}
-		else if((strstr(sent, "time")) || (strstr(sent, "Time")) || (strstr(sent, "TIME")) !=NULL){
-			currentTime();
-		}
-		else if((strstr(sent, "date")) || (strstr(sent, "Date")) || (strstr(sent, "DATE")) || (strstr(sent, "Day")) || (strstr(sent, "day")) || (strstr(sent, "DAY")) || (strstr(sent, "Tareekh")) !=NULL){
-			date();
-		}
-		else if(strstr(sent, "weather") || (strstr(sent, "Weather")) || (strstr(sent, "WEATHER")) != NULL){
-			
-			weather(text);
-		}
-		else if(strstr(sent, "pc name")!=NULL){
-			hostName();
-		}		
-		else if(!(strstr(sent,"quit") !=NULL)){
-			printf("\n\tCommand unrecognized.\n");
-		}
+		getSentence(sent);
+		executeCommand(sent);
 	}
 	printf("\n\tGoodbye. Have a nice day!\n");
 	
 	return 0;
 }
 
+void printIntro(){
+	system("cls");
+	printf("\n\t------    WELCOME TO NATLAN     ------");
+	printf("\n\t- NATURAL LANGUAGE COMMAND INTERFACE -\n");
+	printf("\n\tTo bring up commands, type \"commands\"");
+	printf("\n\tHello! I am Natlan. How may I assist you?\n");
+}
+
+void executeCommand(char sent[]){
+	int gccFlag = 0;
+	if(strstr(sent,"compile")!=NULL){
+		if(strstr(sent, "gcc")!=NULL){
+			gccFlag = 1;
+		}
+		compile(gccFlag);
+	}else if((strstr(sent,"go to")) || (strstr(sent,"open")) || (strstr(sent,"go"))!=NULL){
+		goTo();
+	}else if((strstr(sent, "help")) || (strstr(sent, "commands")) !=NULL){
+		//helpMenu();
+		printf("showing commands");
+	}
+	else
+		if((strstr(sent, "time")) !=NULL){
+			currentTime();
+		}
+		if((strstr(sent, "date")) || (strstr(sent, "day")) !=NULL){
+			date();
+		}
+	else if(strstr(sent, "weather") != NULL){
+		weather(sent);
+	}
+	else if((strstr(sent, "pc")!=NULL) && (strstr(sent, "name")!=NULL)){
+		hostName();
+	}		
+	else{
+		printf("\n\tCommand unrecognized.\n");
+	}
+}
+
+void getSentence(char sent[]){
+	int i = 0;
+	printf("\n\tEnter command:\n\t-> ");
+	scanf ("%[^\n]%*c", sent);
+	while(sent[i]!='\0'){
+		if(sent[i]>64 && sent[i]<91){
+			sent[i]=sent[i]+32;
+		}
+		i++;
+	}
+}
+
 void compile(int flag){
 	int i = 0;
-	char fName[50], cCommand[50];
+	char* fName = (char*) malloc(100*sizeof(char));
+	char* cCommand=(char*) malloc(100*sizeof(char));
+	char* direc=(char*) malloc(100*sizeof(char));
+	char* copyCmd=(char*) malloc(100*sizeof(char));
+	copyCmd="(copy ";
+	char finalCommand[100]="(cd SavedFiles) && (";
+
 	if(flag){
 		strcpy(cCommand, "gcc ");
 	}else{
 		strcpy(cCommand, "tcc ");
 	}
-	printf("\n\tEnter the name of the file: \n\t-> ");
+
+	printf("\n\tEnter the name of the file:\n\t-> ");
 	fgets(fName, 50, stdin);
 	fflush(stdout);
-	strcat(cCommand, fName);
-	printf("\n\tCompiling...\n\t");
-	if(system(cCommand) == '\0'){
-		printf("\n\tCompiled!\n");
+	while(fName[i]!='\n'){
+			i++;
 	}
+	fName[i]='\0';
+	i = 0;
+
+
+	printf("\n\tEnter directory of .c file\n\t-> ");
+	fgets(direc, 100, stdin);
+	fflush(stdout);
+
+	/* Checks if directory has a / at the end or not, and adds one. Concatentes it to "tcc " */
+	if(strstr(direc, "same")==NULL){
+		while(direc[i]!='\n'){
+			i++;
+		}
+		if(direc[i-1]!='\\'){
+		 	direc[i+1]='\0';
+		 	direc[i]='\\';
+		 }
+		strcat(direc, fName);
+	}else{
+		strcpy(direc, fName);
+	}
+
+
+	strcat(cCommand, direc);
+	printf("\n\tCompiling...\n\t");
+
+	if(!(system("mkdir SavedFiles")=='\0')){
+		printf("\twhere file will be compiled.\n\n");
+	}
+	system(strcat(strcat(copyCmd, direc), " SavedFiles)"));
+
+	strcat(finalCommand, cCommand);
+	strcat(finalCommand, ")");
+	if(system(finalCommand) == '\0'){
+		printf("\n\tCompiled and saved %s to SavedFiles folder.\n", direc);
+	}
+	free(fName); free(cCommand); free(direc); free(copyCmd);
 }
 
 void goTo(){
@@ -119,17 +177,26 @@ void date(){
 
 /* pc name */
 void hostName(){
-	system("hostname");
+	printf("\n\tYour computer's name is: ");
+	system("(cd C:/Windows/System32) && (hostname)");
 }
 
 /* weather search */
 void weather(char sentText[]){
-	if(strstr(sentText, "London") || (strstr(sentText, "london")) || (strstr(sentText, "LONDON"))!=NULL)
-	{	
-		system("start http://www.bbc.com/weather/2643743");
-		printf("\n\tShowing weather in London (source: BBC Weather)\n");
-	}
-	
+	char city[50];
+	char tempLink[100]="http://api.openweathermap.org/data/2.5/weather?q=";
+	char weatherLink[100]="START ";
+	printf("\n\tEnter City:\n\t-> ");
+	fgets(city, 50, stdin);
+	char *pos;
+	if ((pos=strchr(city, '\n')) != NULL)
+	    *pos = '\0';
+	printf("\n\tShowing weather in %s. (source: openweathermap.org)\n", city);
+	strcat(tempLink, city);
+	strcat(tempLink, "^&appid=82c3c276bf465cffc7885608c6f3e432^&mode=html");
+
+	strcat(weatherLink, tempLink);
+	system(weatherLink);
 }
 
 /* add numbers */
