@@ -5,14 +5,22 @@
 #define SIZE 512
 
 void printIntro();
+void helpMenu();
 void executeCommand(char sent[]);
 void getSentence(char sent[]);
 void compile(int flag);
+void doMath(char sent[]);
+void calculateResult(double* result, char* operation);
 void goTo();
 void currentTime();
 void date();
 void weather(char sent[]);
 void hostName();
+void displayIP();
+void convertCurrency();
+void printRates();
+void printSeparate();
+
 
 int main(){
 	int i = 0;
@@ -20,6 +28,7 @@ int main(){
 
 	printIntro();
 	while(!(strstr(sent,"quit") !=NULL)){
+		printSeparate();
 		getSentence(sent);
 		executeCommand(sent);
 	}
@@ -33,7 +42,7 @@ void printIntro(){
 	printf("\n\t------    WELCOME TO NATLAN     ------");
 	printf("\n\t- NATURAL LANGUAGE COMMAND INTERFACE -\n");
 	printf("\n\tTo bring up commands, type \"commands\"");
-	printf("\n\tHello! I am Natlan. How may I assist you?\n");
+	printf("\n\tHello! I am NatLan. How may I assist you?\n");
 }
 
 void executeCommand(char sent[]){
@@ -46,8 +55,7 @@ void executeCommand(char sent[]){
 	}else if((strstr(sent,"go to")) || (strstr(sent,"open")) || (strstr(sent,"go"))!=NULL){
 		goTo();
 	}else if((strstr(sent, "help")) || (strstr(sent, "commands")) !=NULL){
-		//helpMenu();
-		printf("showing commands");
+		helpMenu();
 	}
 	else
 		if((strstr(sent, "time")) !=NULL){
@@ -61,10 +69,34 @@ void executeCommand(char sent[]){
 	}
 	else if((strstr(sent, "pc")!=NULL) && (strstr(sent, "name")!=NULL)){
 		hostName();
-	}		
-	else{
-		printf("\n\tCommand unrecognized.\n");
 	}
+	else if((strstr(sent, "ip")!=NULL)){
+		displayIP();
+	}
+	else if((strstr(sent, "math")!=NULL) || (strstr(sent, "add")!=NULL) || (strstr(sent, "subtract")!=NULL) || (strstr(sent, "divide")!=NULL) || (strstr(sent, "multiply")!=NULL)){
+		doMath(sent);
+	}else if((strstr(sent, "currency")!=NULL) && (strstr(sent, "convert")!=NULL)){
+		convertCurrency();
+	}
+	// else{
+	// 	printf("\n\tCommand unrecognized.\n");
+	// }
+}
+
+
+void helpMenu(){
+	printf("\n\t------   NATLAN COMMAND MENU    ------");
+	printf("\n\t- Quit: Quits NatLan.");
+	printf("\n\t- Compile using gcc/tcc: Compiles the file. Uses tcc as compiler by default unless you specify it to use gcc");
+	printf("\n\t- Go to: Asks for the address of a webpage or local drive, and opens it in the browser or Explorer");
+	printf("\n\t- Weather: Prompts for a city, then opens a webpage to show the weather in that city.");
+	printf("\n\t- PC name: Displays the name of the machine.");
+	printf("\n\t- Date/Day: Displays the current date, month and year.");
+	printf("\n\t- Time: Displays the current time.");
+	printf("\n\t- IP: Displays your machine's internet protocol information.");
+	printf("\n\t- Math: Prompts for operation and operands and gives appropriate result.");
+	printf("\n\t- Add/Subtract/Multiply/Divide - Prompts for operands and gives appropriate result directly from main window.");
+	printf("\n");
 }
 
 void getSentence(char sent[]){
@@ -139,6 +171,65 @@ void compile(int flag){
 	free(fName); free(cCommand); free(direc); free(copyCmd);
 }
 
+void doMath(char sent[]){
+	char operation;
+	double result;
+	int flag = 1;
+	do{
+		operation = 0, result = 0;
+		if(strstr(sent, "math")!=NULL || flag==0){
+			do{
+				printf("\n\tWhich operation would you like to do?\n\tPossible Inputs: (+, -, /, *) or 'b' to go back.\n\t-> ");
+				scanf("%c", &operation);
+				fflush(stdin);
+			}while(operation!='+' && operation!='-' && operation!='*' && operation!='/' && operation!='b');
+		}else if(strstr(sent, "add")!=NULL && flag){
+			operation = '+';
+			flag = 0;
+		}else if((strstr(sent, "subtract")) || (strstr(sent, "minus"))!=NULL && flag){
+			operation = '-';
+			flag = 0;
+		}else if((strstr(sent, "divide")!=NULL) && flag){
+			operation = '/';
+			flag = 0;
+		}else if(strstr(sent, "multiply")!=NULL && flag){
+			operation = '*';
+			flag = 0;
+		}
+
+		if(operation!='b'){
+			calculateResult(&result, &operation);
+
+			printf("\n\t-> %g.\n", result);	
+			fflush(stdin);
+		}
+	}while(operation!='b' && flag);
+}
+
+void calculateResult(double* result, char* operation){
+	double firstNum = 0, secNum = 0;
+	printf("\n\tEnter first number: ");
+	scanf("%lf", &firstNum);
+	
+	printf("\n\tEnter second number: ");
+	scanf("%lf", &secNum);
+
+	switch(*operation){
+		case '+':
+			*result = firstNum + secNum;
+			break;
+		case '-':
+			*result = firstNum - secNum;
+			break;
+		case '*':
+			*result = firstNum * secNum;
+			break;
+		case '/':
+			*result = firstNum / secNum;
+			break;
+	}
+}
+
 void goTo(){
 	char cCommand2[50];
 	char fName[50];
@@ -178,7 +269,13 @@ void date(){
 /* pc name */
 void hostName(){
 	printf("\n\tYour computer's name is: ");
-	system("(cd C:/Windows/System32) && (hostname)");
+	system("C:\\Windows\\System32\\hostname");
+}
+
+/* displays the internet protocol */
+void displayIP(){
+	printf("\n\tYour computer's Internet Protocol information:\n\t");
+	system("C:\\Windows\\System32\\ipconfig");
 }
 
 /* weather search */
@@ -192,6 +289,7 @@ void weather(char sentText[]){
 	if ((pos=strchr(city, '\n')) != NULL)
 	    *pos = '\0';
 	printf("\n\tShowing weather in %s. (source: openweathermap.org)\n", city);
+	sleep(1000);
 	strcat(tempLink, city);
 	strcat(tempLink, "^&appid=82c3c276bf465cffc7885608c6f3e432^&mode=html");
 
@@ -199,15 +297,44 @@ void weather(char sentText[]){
 	system(weatherLink);
 }
 
-/* add numbers */
-/*void addNumbers(){
-	int add[512];
-	int i = 0;
-	for
-}*/
+/* convert currency */
 
-/*
-void helpMenu(){
-	printf("\n\t------   NATLAN COMMAND MENU    ------");
-	printf("\n\t-compile: Compiles the file. Uses tcc as compiler by default unless you specify it to use gcc");
-*/
+void convertCurrency(){
+	float rate = 0, sCurrency = 0, bCurrency = 0;
+	char conv = 0, conv2 = 0;
+	char test[60];
+	FILE* rates = fopen("rates.dat", "r");
+	printSeparate();
+	printRates();
+	printf("\n\tEnter Sr. No. of conversion: \n\t-> ");
+	scanf("%c", &conv);
+	do{
+
+		fscanf(rates, "%c %f\n", &conv2, &rate);
+		fflush(stdin);
+	}while(conv2!=';' && conv2!=conv);
+
+	if(conv2==';'){
+		printf("\n\tData not found for given conversion.\n");
+	}else{
+		printf("\n\tEnter base currency: ");
+		scanf("%f", &bCurrency);
+
+		sCurrency = bCurrency*rate;
+
+		printf("\n\tUsing rate %g, the converted currency is: %g.\n", rate, sCurrency);
+	}
+	fclose(rates);
+	fflush(stdin);
+}
+
+void printRates(){
+	printf("\n\t[A] PKR to USD | [B] USD to PKR");
+	printf("\n\t[C] PKR to EUR | [D] EUR to PKR");
+	printf("\n\t[E] USD to EUR | [F] EUR to USD");
+	printf("\n\t[G] PKR to AED | [H] AED to PKR\n\t");
+}
+
+void printSeparate(){
+	printf("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\t");
+}
