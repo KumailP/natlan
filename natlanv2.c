@@ -20,7 +20,7 @@ void displayIP();
 void convertCurrency();
 void printRates();
 void printSeparate();
-
+void questionAnswer(char sentText[]);
 
 int main(){
 	int i = 0;
@@ -77,6 +77,9 @@ void executeCommand(char sent[]){
 		doMath(sent);
 	}else if((strstr(sent, "currency")!=NULL) && (strstr(sent, "convert")!=NULL)){
 		convertCurrency();
+	}
+	else if((strstr(sent, "my")!=NULL && strstr(sent, "name")!=NULL) || strstr(sent, "looking")!=NULL || (strstr(sent, "look")!=NULL) || (strstr(sent, "your")!=NULL && strstr(sent, "name")!=NULL) || (strstr(sent, "made")!=NULL && strstr(sent, "you")!=NULL) || (strstr(sent, "meaning")!=NULL && strstr(sent, "life")!=NULL) || (strstr(sent, "knock")!=NULL || strstr(sent,"knockknock")!=NULL) || (strstr(sent, "make")!=NULL && (strstr(sent, "sandwich") || strstr(sent, "burger")!=NULL)) || (strstr(sent, "your")!=NULL && strstr(sent, "language")!=NULL) || (strstr(sent, "am")!=NULL && strstr(sent, "sleepy")!=NULL) || (strstr(sent, "best")!=NULL && strstr(sent, "operating")!=NULL && strstr(sent, "system")!=NULL)|| (strstr(sent, "put")!=NULL && strstr(sent, "my")!=NULL && strstr(sent, "keys")!=NULL) || (strstr(sent, "you")!=NULL && strstr(sent, "sleeping")!=NULL) || (strstr(sent, "roll")!=NULL && strstr(sent, "dice")!=NULL)){
+		questionAnswer(sent);
 	}
 	// else{
 	// 	printf("\n\tCommand unrecognized.\n");
@@ -295,6 +298,73 @@ void weather(char sentText[]){
 
 	strcat(weatherLink, tempLink);
 	system(weatherLink);
+}
+
+void questionAnswer(char sentText[]){
+	int computer;
+
+	if(strstr(sentText, "my")!=NULL && strstr(sentText, "name")!=NULL){
+		printf("\n\tDon't you even know your name "); system("C:\\Windows\\System32\\hostname");
+	}
+	else if((strstr(sentText, "looking")!=NULL || (strstr(sentText, "look")!=NULL))){
+		printf("\n\tI guess you better see yourself in mirror!");
+	}
+	else if(strstr(sentText, "your")!=NULL && strstr(sentText, "name")!=NULL){
+		printf("\n\tI don't want to tell you.");
+	}
+	else if(strstr(sentText, "made")!=NULL && strstr(sentText, "you")!=NULL){
+		printf("\n\tShayan and Kumail, CS-102 students.");
+	}
+	else if(strstr(sentText, "meaning")!=NULL && strstr(sentText, "life")!=NULL){
+		printf("\n\tMy instructors told me never to answer that question.");
+	}
+	else if(strstr(sentText, "knock")!=NULL || strstr(sentText,"knockknock")!=NULL){
+		printf("\n\tI don't do these knock knock jokes.");
+	}
+	else if(strstr(sentText, "make")!=NULL && (strstr(sentText, "sandwich") || strstr(sentText, "burger")!=NULL)){
+		printf("\n\tI am not really good in making food, but I can help you with a recipe.");
+	}
+	else if(strstr(sentText, "your")!=NULL && strstr(sentText, "language")!=NULL){
+		printf("\n\tA mixture of zeros and ones, you may find it awkward.");
+	}
+	else if(strstr(sentText, "am")!=NULL && strstr(sentText, "sleepy")!=NULL){
+		printf("\n\tShut down your computer and take a nap, I will wait for you here.");
+	}
+	else if(strstr(sentText, "best")!=NULL && strstr(sentText, "operating")!=NULL && strstr(sentText, "system")!=NULL){
+		printf("\n\tI am all Windows now perhaps I am biased, but who knows in the near future I will be favouring Macintosh.");
+	}
+	else if(strstr(sentText, "put")!=NULL && strstr(sentText, "my")!=NULL && strstr(sentText, "keys")!=NULL){
+		printf("\n\tDidn't you just have them?");
+	}
+	else if(strstr(sentText, "you")!=NULL && strstr(sentText, "sleeping")!=NULL){
+		printf("\n\tI don't sleep. I am always available for your assistance.");
+	}
+	else if(strstr(sentText, "roll")!=NULL && strstr(sentText, "dice")!=NULL){
+	srand(time(NULL));
+	computer = rand()%6;
+	if(computer==0){
+		computer = 6;
+	}
+	if(computer==1){
+		printf("\n\tIt is %d\n", computer);
+	}
+	else if(computer==2){
+		printf("\n\tIt is %d\n", computer);
+	}
+	else if(computer==3){
+		printf("\n\tIt is %d\n", computer);
+	}
+	else if(computer==4){
+		printf("\n\tIt is %d\n", computer);
+	}		
+	else if(computer==5){
+		printf("\n\tIt is %d\n", computer);
+	}
+	else if(computer==6){
+		printf("\n\tIt is %d\n", computer);
+	}
+}
+
 }
 
 /* convert currency */
