@@ -19,7 +19,6 @@ void hostName();
 void displayIP();
 void convertCurrency();
 void printRates();
-void printSeparate();
 void questionAnswer(char sentText[]);
 
 int main(){
@@ -28,12 +27,12 @@ int main(){
 
 	printIntro();
 	while(!(strstr(sent,"quit") !=NULL)){
-		printSeparate();
+		printf("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\t");
 		getSentence(sent);
 		executeCommand(sent);
 	}
 	printf("\n\tGoodbye. Have a nice day!\n");
-	
+
 	return 0;
 }
 
@@ -47,23 +46,26 @@ void printIntro(){
 
 void executeCommand(char sent[]){
 	int gccFlag = 0;
+	printf("\n\tNatLan: ");
 	if(strstr(sent,"compile")!=NULL){
 		if(strstr(sent, "gcc")!=NULL){
-			gccFlag = 1;
+			printf("(using gcc)\n");
+			compile(1);
+		}else{
+			printf("(using tcc)\n");
+			compile(0);
 		}
-		compile(gccFlag);
 	}else if((strstr(sent,"go to")) || (strstr(sent,"open")) || (strstr(sent,"go"))!=NULL){
 		goTo();
 	}else if((strstr(sent, "help")) || (strstr(sent, "commands")) !=NULL){
 		helpMenu();
 	}
-	else
-		if((strstr(sent, "time")) !=NULL){
-			currentTime();
-		}
-		if((strstr(sent, "date")) || (strstr(sent, "day")) !=NULL){
-			date();
-		}
+	else if((strstr(sent, "time")) !=NULL){
+		currentTime();
+	}
+	else if((strstr(sent, "date")) || (strstr(sent, "day")) !=NULL){
+		date();
+	}
 	else if(strstr(sent, "weather") != NULL){
 		weather(sent);
 	}
@@ -81,9 +83,12 @@ void executeCommand(char sent[]){
 	else if((strstr(sent, "my")!=NULL && strstr(sent, "name")!=NULL) || strstr(sent, "looking")!=NULL || (strstr(sent, "look")!=NULL) || (strstr(sent, "your")!=NULL && strstr(sent, "name")!=NULL) || (strstr(sent, "made")!=NULL && strstr(sent, "you")!=NULL) || (strstr(sent, "meaning")!=NULL && strstr(sent, "life")!=NULL) || (strstr(sent, "knock")!=NULL || strstr(sent,"knockknock")!=NULL) || (strstr(sent, "make")!=NULL && (strstr(sent, "sandwich") || strstr(sent, "burger")!=NULL)) || (strstr(sent, "your")!=NULL && strstr(sent, "language")!=NULL) || (strstr(sent, "am")!=NULL && strstr(sent, "sleepy")!=NULL) || (strstr(sent, "best")!=NULL && strstr(sent, "operating")!=NULL && strstr(sent, "system")!=NULL)|| (strstr(sent, "put")!=NULL && strstr(sent, "my")!=NULL && strstr(sent, "keys")!=NULL) || (strstr(sent, "you")!=NULL && strstr(sent, "sleeping")!=NULL) || (strstr(sent, "roll")!=NULL && strstr(sent, "dice")!=NULL)){
 		questionAnswer(sent);
 	}
-	// else{
-	// 	printf("\n\tCommand unrecognized.\n");
-	// }
+	else{
+		if((strstr(sent, "quit")==NULL))
+			printf("\n\tCommand unrecognized.\n");
+	}
+
+	fflush(stdin);
 }
 
 
@@ -99,6 +104,10 @@ void helpMenu(){
 	printf("\n\t- IP: Displays your machine's internet protocol information.");
 	printf("\n\t- Math: Prompts for operation and operands and gives appropriate result.");
 	printf("\n\t- Add/Subtract/Multiply/Divide - Prompts for operands and gives appropriate result directly from main window.");
+	printf("\n\t- Roll a dice - Rolls a dice and displays the face value.");
+	printf("\n\t- Convert currency - Converts currency from rates given in .dat file");
+	printf("\n\t There are a few more \"fun\" commands. These are left for you to explore!\n\t(e.g.) What is my name?");
+	printf("\n\tThe program will keep asking you for input unless told to quit.");
 	printf("\n");
 }
 
@@ -116,12 +125,14 @@ void getSentence(char sent[]){
 
 void compile(int flag){
 	int i = 0;
-	char* fName = (char*) malloc(100*sizeof(char));
-	char* cCommand=(char*) malloc(100*sizeof(char));
-	char* direc=(char*) malloc(100*sizeof(char));
-	char* copyCmd=(char*) malloc(100*sizeof(char));
-	copyCmd="(copy ";
+	char direc2[100]={0};
+	char fName[100];
+	char cCommand[100];
+	char direc[100];
+	char copyCmd[100];
+	strcpy(copyCmd, "(copy ");
 	char finalCommand[100]="(cd SavedFiles) && (";
+	char tempC = 0;
 
 	if(flag){
 		strcpy(cCommand, "gcc ");
@@ -131,7 +142,7 @@ void compile(int flag){
 
 	printf("\n\tEnter the name of the file:\n\t-> ");
 	fgets(fName, 50, stdin);
-	fflush(stdout);
+	fflush(stdin);
 	while(fName[i]!='\n'){
 			i++;
 	}
@@ -141,22 +152,32 @@ void compile(int flag){
 
 	printf("\n\tEnter directory of .c file\n\t-> ");
 	fgets(direc, 100, stdin);
-	fflush(stdout);
+	fflush(stdin);
 
 	/* Checks if directory has a / at the end or not, and adds one. Concatentes it to "tcc " */
 	if(strstr(direc, "same")==NULL){
-		while(direc[i]!='\n'){
-			i++;
-		}
+		while(direc[i++]!='\n');
 		if(direc[i-1]!='\\'){
 		 	direc[i+1]='\0';
 		 	direc[i]='\\';
 		 }
 		strcat(direc, fName);
+		i = 0;
+
+		direc2[0] = '"';
+		strcat(direc, "\"");
+		strcat(direc2, direc);
+		strcpy(direc, direc2);
+
+		i = 0;
+		while(direc[++i]!='\n');
+		if(direc[i]=='\n'){
+			direc[i]='\\';
+		}
+		i = 0;
 	}else{
 		strcpy(direc, fName);
 	}
-
 
 	strcat(cCommand, direc);
 	printf("\n\tCompiling...\n\t");
@@ -164,14 +185,17 @@ void compile(int flag){
 	if(!(system("mkdir SavedFiles")=='\0')){
 		printf("\twhere file will be compiled.\n\n");
 	}
+
 	system(strcat(strcat(copyCmd, direc), " SavedFiles)"));
 
 	strcat(finalCommand, cCommand);
 	strcat(finalCommand, ")");
+
+
 	if(system(finalCommand) == '\0'){
-		printf("\n\tCompiled and saved %s to SavedFiles folder.\n", direc);
+		printf("\n\tCompiled and saved %s to SavedFiles folder.\n", fName);
 	}
-	free(fName); free(cCommand); free(direc); free(copyCmd);
+	fflush(stdin);
 }
 
 void doMath(char sent[]){
@@ -182,7 +206,7 @@ void doMath(char sent[]){
 		operation = 0, result = 0;
 		if(strstr(sent, "math")!=NULL || flag==0){
 			do{
-				printf("\n\tWhich operation would you like to do?\n\tPossible Inputs: (+, -, /, *) or 'b' to go back.\n\t-> ");
+				printf("Which operation would you like to do?\n\tPossible Inputs: (+, -, /, *) or 'b' to go back.\n\t-> ");
 				scanf("%c", &operation);
 				fflush(stdin);
 			}while(operation!='+' && operation!='-' && operation!='*' && operation!='/' && operation!='b');
@@ -203,7 +227,7 @@ void doMath(char sent[]){
 		if(operation!='b'){
 			calculateResult(&result, &operation);
 
-			printf("\n\t-> %g.\n", result);	
+			printf("\n\t-> %g.\n", result);
 			fflush(stdin);
 		}
 	}while(operation!='b' && flag);
@@ -213,7 +237,7 @@ void calculateResult(double* result, char* operation){
 	double firstNum = 0, secNum = 0;
 	printf("\n\tEnter first number: ");
 	scanf("%lf", &firstNum);
-	
+
 	printf("\n\tEnter second number: ");
 	scanf("%lf", &secNum);
 
@@ -266,7 +290,7 @@ void date(){
   	curtime = time (NULL);
   	loctime = localtime (&curtime);
   	strftime (timedate, SIZE, "\n\tToday is %A, %B %d, %Y.\n", loctime);
-  	fputs (timedate, stdout);	
+  	fputs (timedate, stdout);
 }
 
 /* pc name */
@@ -292,7 +316,6 @@ void weather(char sentText[]){
 	if ((pos=strchr(city, '\n')) != NULL)
 	    *pos = '\0';
 	printf("\n\tShowing weather in %s. (source: openweathermap.org)\n", city);
-	sleep(1000);
 	strcat(tempLink, city);
 	strcat(tempLink, "^&appid=82c3c276bf465cffc7885608c6f3e432^&mode=html");
 
@@ -300,14 +323,16 @@ void weather(char sentText[]){
 	system(weatherLink);
 }
 
+
+/* includes fun questions and answers for the user */
 void questionAnswer(char sentText[]){
-	int computer;
+	int computer = 0, i = 0;
 
 	if(strstr(sentText, "my")!=NULL && strstr(sentText, "name")!=NULL){
-		printf("\n\tDon't you even know your name "); system("C:\\Windows\\System32\\hostname");
+		printf("\n\tDon't you even know your name, "); system("C:\\Windows\\System32\\hostname");
 	}
 	else if((strstr(sentText, "looking")!=NULL || (strstr(sentText, "look")!=NULL))){
-		printf("\n\tI guess you better see yourself in mirror!");
+		printf("\n\tI guess you better see yourself in the mirror!");
 	}
 	else if(strstr(sentText, "your")!=NULL && strstr(sentText, "name")!=NULL){
 		printf("\n\tI don't want to tell you.");
@@ -318,14 +343,14 @@ void questionAnswer(char sentText[]){
 	else if(strstr(sentText, "meaning")!=NULL && strstr(sentText, "life")!=NULL){
 		printf("\n\tMy instructors told me never to answer that question.");
 	}
-	else if(strstr(sentText, "knock")!=NULL || strstr(sentText,"knockknock")!=NULL){
+	else if(strstr(sentText, "knock")!=NULL){
 		printf("\n\tI don't do these knock knock jokes.");
 	}
 	else if(strstr(sentText, "make")!=NULL && (strstr(sentText, "sandwich") || strstr(sentText, "burger")!=NULL)){
-		printf("\n\tI am not really good in making food, but I can help you with a recipe.");
+		printf("\n\tI am not really good at making food, but I can help you with a recipe.");
 	}
 	else if(strstr(sentText, "your")!=NULL && strstr(sentText, "language")!=NULL){
-		printf("\n\tA mixture of zeros and ones, you may find it awkward.");
+		printf("\n\tA mixture of zeros and ones, you may find it confusing.");
 	}
 	else if(strstr(sentText, "am")!=NULL && strstr(sentText, "sleepy")!=NULL){
 		printf("\n\tShut down your computer and take a nap, I will wait for you here.");
@@ -345,24 +370,10 @@ void questionAnswer(char sentText[]){
 	if(computer==0){
 		computer = 6;
 	}
-	if(computer==1){
-		printf("\n\tIt is %d\n", computer);
-	}
-	else if(computer==2){
-		printf("\n\tIt is %d\n", computer);
-	}
-	else if(computer==3){
-		printf("\n\tIt is %d\n", computer);
-	}
-	else if(computer==4){
-		printf("\n\tIt is %d\n", computer);
-	}		
-	else if(computer==5){
-		printf("\n\tIt is %d\n", computer);
-	}
-	else if(computer==6){
-		printf("\n\tIt is %d\n", computer);
-	}
+	printf("\n\tRolling..");
+
+	printf("\n\tThe face value is: %d!", computer);
+
 }
 
 }
@@ -374,7 +385,7 @@ void convertCurrency(){
 	char conv = 0, conv2 = 0;
 	char test[60];
 	FILE* rates = fopen("rates.dat", "r");
-	printSeparate();
+	printf("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\t");
 	printRates();
 	printf("\n\tEnter Sr. No. of conversion: \n\t-> ");
 	scanf("%c", &conv);
@@ -398,13 +409,10 @@ void convertCurrency(){
 	fflush(stdin);
 }
 
+/* prints the rates used for convertCurrency function */
 void printRates(){
 	printf("\n\t[A] PKR to USD | [B] USD to PKR");
 	printf("\n\t[C] PKR to EUR | [D] EUR to PKR");
 	printf("\n\t[E] USD to EUR | [F] EUR to USD");
 	printf("\n\t[G] PKR to AED | [H] AED to PKR\n\t");
-}
-
-void printSeparate(){
-	printf("\n\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\t");
 }
